@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dexilon-exchange/v3/modules/pruning"
+	"github.com/dexilon-exchange/juno/v3/modules/pruning"
 )
 
 func TestParseConfig(t *testing.T) {

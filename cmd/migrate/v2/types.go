@@ -3,12 +3,12 @@ package v2
 import (
 	"time"
 
-	loggingconfig "github.com/dexilon-exchange/v3/logging/config"
-	"github.com/dexilon-exchange/v3/modules/pruning"
-	"github.com/dexilon-exchange/v3/modules/telemetry"
-	nodeconfig "github.com/dexilon-exchange/v3/node/config"
-	pricefeedconfig "github.com/dexilon-exchange/v3/pricefeed"
-	"github.com/dexilon-exchange/v3/types/config"
+	loggingconfig "github.com/dexilon-exchange/juno/v3/logging/config"
+	"github.com/dexilon-exchange/juno/v3/modules/pruning"
+	"github.com/dexilon-exchange/juno/v3/modules/telemetry"
+	nodeconfig "github.com/dexilon-exchange/juno/v3/node/config"
+	pricefeedconfig "github.com/dexilon-exchange/juno/v3/pricefeed"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 )
 
 type Config struct {

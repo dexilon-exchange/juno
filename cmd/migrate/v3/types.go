@@ -1,14 +1,14 @@
 package v3
 
 import (
-	databaseconfig "github.com/dexilon-exchange/v3/database/config"
-	loggingconfig "github.com/dexilon-exchange/v3/logging/config"
-	"github.com/dexilon-exchange/v3/modules/pruning"
-	"github.com/dexilon-exchange/v3/modules/telemetry"
-	nodeconfig "github.com/dexilon-exchange/v3/node/config"
-	parserconfig "github.com/dexilon-exchange/v3/parser/config"
-	pricefeedconfig "github.com/dexilon-exchange/v3/pricefeed"
-	"github.com/dexilon-exchange/v3/types/config"
+	databaseconfig "github.com/dexilon-exchange/juno/v3/database/config"
+	loggingconfig "github.com/dexilon-exchange/juno/v3/logging/config"
+	"github.com/dexilon-exchange/juno/v3/modules/pruning"
+	"github.com/dexilon-exchange/juno/v3/modules/telemetry"
+	nodeconfig "github.com/dexilon-exchange/juno/v3/node/config"
+	parserconfig "github.com/dexilon-exchange/juno/v3/parser/config"
+	pricefeedconfig "github.com/dexilon-exchange/juno/v3/pricefeed"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 )
 
 // Config defines all necessary juno configuration parameters.

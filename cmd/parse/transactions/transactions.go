@@ -3,14 +3,14 @@ package transactions
 import (
 	"fmt"
 
-	parsecmdtypes "github.com/dexilon-exchange/v3/cmd/parse/types"
+	parsecmdtypes "github.com/dexilon-exchange/juno/v3/cmd/parse/types"
 
 	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
 
-	"github.com/dexilon-exchange/v3/parser"
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/parser"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 )
 
 const (

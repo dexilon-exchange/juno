@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 )
 
 // SdkConfigSetup represents a method that allows to customize the given sdk.Config.

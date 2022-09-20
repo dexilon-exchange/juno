@@ -3,12 +3,12 @@ package main
 import (
 	"os"
 
-	"github.com/dexilon-exchange/v3/cmd/parse/types"
+	"github.com/dexilon-exchange/juno/v3/cmd/parse/types"
 
-	"github.com/dexilon-exchange/v3/modules/messages"
-	"github.com/dexilon-exchange/v3/modules/registrar"
+	"github.com/dexilon-exchange/juno/v3/modules/messages"
+	"github.com/dexilon-exchange/juno/v3/modules/registrar"
 
-	"github.com/dexilon-exchange/v3/cmd"
+	"github.com/dexilon-exchange/juno/v3/cmd"
 )
 
 func main() {

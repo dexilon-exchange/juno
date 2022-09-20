@@ -32,8 +32,8 @@ import (
 	"github.com/tendermint/tendermint/store"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/dexilon-exchange/v3/node"
-	"github.com/dexilon-exchange/v3/types"
+	"github.com/dexilon-exchange/juno/v3/node"
+	"github.com/dexilon-exchange/juno/v3/types"
 
 	"path"
 	"time"

@@ -4,20 +4,20 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/dexilon-exchange/v3/node"
+	"github.com/dexilon-exchange/juno/v3/node"
 
-	"github.com/dexilon-exchange/v3/modules/telemetry"
+	"github.com/dexilon-exchange/juno/v3/modules/telemetry"
 
-	"github.com/dexilon-exchange/v3/logging"
+	"github.com/dexilon-exchange/juno/v3/logging"
 
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 
-	"github.com/dexilon-exchange/v3/modules/pruning"
+	"github.com/dexilon-exchange/juno/v3/modules/pruning"
 
-	"github.com/dexilon-exchange/v3/modules"
-	"github.com/dexilon-exchange/v3/modules/messages"
+	"github.com/dexilon-exchange/juno/v3/modules"
+	"github.com/dexilon-exchange/juno/v3/modules/messages"
 
-	"github.com/dexilon-exchange/v3/database"
+	"github.com/dexilon-exchange/juno/v3/database"
 )
 
 // Context represents the context of the modules registrar

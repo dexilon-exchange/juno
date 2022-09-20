@@ -4,9 +4,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/dexilon-exchange/v3/database"
-	"github.com/dexilon-exchange/v3/modules"
-	"github.com/dexilon-exchange/v3/types"
+	"github.com/dexilon-exchange/juno/v3/database"
+	"github.com/dexilon-exchange/juno/v3/modules"
+	"github.com/dexilon-exchange/juno/v3/types"
 )
 
 var _ modules.Module = &Module{}

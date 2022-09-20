@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
-	nodeconfig "github.com/dexilon-exchange/v3/node/config"
-	"github.com/dexilon-exchange/v3/node/local"
-	"github.com/dexilon-exchange/v3/node/remote"
+	nodeconfig "github.com/dexilon-exchange/juno/v3/node/config"
+	"github.com/dexilon-exchange/juno/v3/node/local"
+	"github.com/dexilon-exchange/juno/v3/node/remote"
 )
 
 func TestConfig_UnmarshalYAML(t *testing.T) {

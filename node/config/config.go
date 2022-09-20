@@ -3,8 +3,8 @@ package config
 import (
 	"gopkg.in/yaml.v3"
 
-	"github.com/dexilon-exchange/v3/node/local"
-	"github.com/dexilon-exchange/v3/node/remote"
+	"github.com/dexilon-exchange/juno/v3/node/local"
+	"github.com/dexilon-exchange/juno/v3/node/remote"
 )
 
 const (

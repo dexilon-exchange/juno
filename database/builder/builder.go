@@ -1,9 +1,9 @@
 package builder
 
 import (
-	"github.com/dexilon-exchange/v3/database"
+	"github.com/dexilon-exchange/juno/v3/database"
 
-	"github.com/dexilon-exchange/v3/database/postgresql"
+	"github.com/dexilon-exchange/juno/v3/database/postgresql"
 )
 
 // Builder represents a generic Builder implementation that build the proper database

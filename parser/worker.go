@@ -8,22 +8,22 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/authz"
 
-	"github.com/dexilon-exchange/v3/logging"
+	"github.com/dexilon-exchange/juno/v3/logging"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"github.com/dexilon-exchange/v3/database"
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/database"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 
-	"github.com/dexilon-exchange/v3/modules"
+	"github.com/dexilon-exchange/juno/v3/modules"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/dexilon-exchange/v3/node"
-	"github.com/dexilon-exchange/v3/types"
-	"github.com/dexilon-exchange/v3/types/utils"
+	"github.com/dexilon-exchange/juno/v3/node"
+	"github.com/dexilon-exchange/juno/v3/types"
+	"github.com/dexilon-exchange/juno/v3/types/utils"
 )
 
 // Worker defines a job consumer that is responsible for getting and

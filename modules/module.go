@@ -11,7 +11,7 @@ import (
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/dexilon-exchange/v3/types"
+	"github.com/dexilon-exchange/juno/v3/types"
 )
 
 // Module represents a generic module without any particular handling of data

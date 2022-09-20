@@ -11,10 +11,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/dexilon-exchange/v3/database"
-	databaseconfig "github.com/dexilon-exchange/v3/database/config"
-	postgres "github.com/dexilon-exchange/v3/database/postgresql"
-	"github.com/dexilon-exchange/v3/logging"
+	"github.com/dexilon-exchange/juno/v3/database"
+	databaseconfig "github.com/dexilon-exchange/juno/v3/database/config"
+	postgres "github.com/dexilon-exchange/juno/v3/database/postgresql"
+	"github.com/dexilon-exchange/juno/v3/logging"
 )
 
 func TestDatabaseTestSuite(t *testing.T) {

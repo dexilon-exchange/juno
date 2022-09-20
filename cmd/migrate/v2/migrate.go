@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	parsecmdtypes "github.com/dexilon-exchange/v3/cmd/parse/types"
+	parsecmdtypes "github.com/dexilon-exchange/juno/v3/cmd/parse/types"
 
 	"gopkg.in/yaml.v3"
 
-	v1 "github.com/dexilon-exchange/v3/cmd/migrate/v1"
+	v1 "github.com/dexilon-exchange/juno/v3/cmd/migrate/v1"
 
-	loggingconfig "github.com/dexilon-exchange/v3/logging/config"
-	"github.com/dexilon-exchange/v3/modules/pruning"
-	"github.com/dexilon-exchange/v3/modules/telemetry"
-	nodeconfig "github.com/dexilon-exchange/v3/node/config"
-	"github.com/dexilon-exchange/v3/node/remote"
-	"github.com/dexilon-exchange/v3/types/config"
+	loggingconfig "github.com/dexilon-exchange/juno/v3/logging/config"
+	"github.com/dexilon-exchange/juno/v3/modules/pruning"
+	"github.com/dexilon-exchange/juno/v3/modules/telemetry"
+	nodeconfig "github.com/dexilon-exchange/juno/v3/node/config"
+	"github.com/dexilon-exchange/juno/v3/node/remote"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 )
 
 // RunMigration runs the migration that migrates the data from v1 to v2

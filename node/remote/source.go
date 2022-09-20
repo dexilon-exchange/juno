@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/dexilon-exchange/v3/node"
+	"github.com/dexilon-exchange/juno/v3/node"
 )
 
 var (

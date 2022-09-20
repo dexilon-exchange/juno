@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dexilon-exchange/v3/logging"
+	"github.com/dexilon-exchange/juno/v3/logging"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/lib/pq"
 
 	_ "github.com/lib/pq" // nolint
 
-	"github.com/dexilon-exchange/v3/database"
-	"github.com/dexilon-exchange/v3/types"
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/database"
+	"github.com/dexilon-exchange/juno/v3/types"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 )
 
 // type check to ensure interface is properly implemented

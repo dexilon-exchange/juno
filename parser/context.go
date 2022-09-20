@@ -3,11 +3,11 @@ package parser
 import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 
-	"github.com/dexilon-exchange/v3/logging"
-	"github.com/dexilon-exchange/v3/node"
+	"github.com/dexilon-exchange/juno/v3/logging"
+	"github.com/dexilon-exchange/juno/v3/node"
 
-	"github.com/dexilon-exchange/v3/database"
-	"github.com/dexilon-exchange/v3/modules"
+	"github.com/dexilon-exchange/juno/v3/database"
+	"github.com/dexilon-exchange/juno/v3/modules"
 )
 
 // Context represents the context that is shared among different workers

@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/dexilon-exchange/v3/parser"
+	"github.com/dexilon-exchange/juno/v3/parser"
 
-	nodebuilder "github.com/dexilon-exchange/v3/node/builder"
-	"github.com/dexilon-exchange/v3/types/config"
+	nodebuilder "github.com/dexilon-exchange/juno/v3/node/builder"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 
-	"github.com/dexilon-exchange/v3/database"
+	"github.com/dexilon-exchange/juno/v3/database"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	modsregistrar "github.com/dexilon-exchange/v3/modules/registrar"
+	modsregistrar "github.com/dexilon-exchange/juno/v3/modules/registrar"
 )
 
 // GetParserContext setups all the things that can be used to later parse the chain state

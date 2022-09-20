@@ -1,4 +1,4 @@
-module github.com/dexilon-exchange/v3
+module github.com/dexilon-exchange/juno/v3
 
 go 1.17
 

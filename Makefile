@@ -13,8 +13,8 @@ all: lint test-unit install
 ###                                Build flags                              ###
 ###############################################################################
 
-LD_FLAGS = -X github.com/dexilon-exchange/v3/cmd.Version=$(VERSION) \
-	-X github.com/dexilon-exchange/v3/cmd.Commit=$(COMMIT)
+LD_FLAGS = -X github.com/dexilon-exchange/juno/v3/cmd.Version=$(VERSION) \
+	-X github.com/dexilon-exchange/juno/v3/cmd.Commit=$(COMMIT)
 
 BUILD_FLAGS := -ldflags '$(LD_FLAGS)'
 

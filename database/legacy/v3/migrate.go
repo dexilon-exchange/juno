@@ -6,9 +6,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 
-	types "github.com/dexilon-exchange/v3/database/migrate/utils"
+	types "github.com/dexilon-exchange/juno/v3/database/migrate/utils"
 )
 
 // Migrate implements database.Migrator

@@ -5,14 +5,14 @@ import (
 	"os"
 	"path"
 
-	"github.com/dexilon-exchange/v3/types/config"
+	"github.com/dexilon-exchange/juno/v3/types/config"
 
-	initcmd "github.com/dexilon-exchange/v3/cmd/init"
-	migratecmd "github.com/dexilon-exchange/v3/cmd/migrate"
-	parsecmd "github.com/dexilon-exchange/v3/cmd/parse"
-	startcmd "github.com/dexilon-exchange/v3/cmd/start"
+	initcmd "github.com/dexilon-exchange/juno/v3/cmd/init"
+	migratecmd "github.com/dexilon-exchange/juno/v3/cmd/migrate"
+	parsecmd "github.com/dexilon-exchange/juno/v3/cmd/parse"
+	startcmd "github.com/dexilon-exchange/juno/v3/cmd/start"
 
-	"github.com/dexilon-exchange/v3/types"
+	"github.com/dexilon-exchange/juno/v3/types"
 
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/cli"

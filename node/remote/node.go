@@ -17,11 +17,11 @@ import (
 	constypes "github.com/tendermint/tendermint/consensus/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 
-	"github.com/dexilon-exchange/v3/node"
+	"github.com/dexilon-exchange/juno/v3/node"
 
 	"github.com/cosmos/cosmos-sdk/types/tx"
 
-	"github.com/dexilon-exchange/v3/types"
+	"github.com/dexilon-exchange/juno/v3/types"
 
 	httpclient "github.com/tendermint/tendermint/rpc/client/http"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
