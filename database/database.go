@@ -53,6 +53,12 @@ type Database interface {
 	Close()
 }
 
+type SQLOperationIntegrity interface {
+	Begin() error
+	Commit() error
+	Rollback() error
+}
+
 // PruningDb represents a database that supports pruning properly
 type PruningDb interface {
 	// Prune prunes the data for the given height, returning any error

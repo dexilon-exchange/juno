@@ -61,8 +61,12 @@ func DefaultRPCConfig() *RPCConfig {
 
 // GRPCConfig contains the configuration for the RPC endpoint
 type GRPCConfig struct {
-	Address  string `yaml:"address"`
-	Insecure bool   `yaml:"insecure"`
+	Address     string `yaml:"address"`
+	Insecure    bool   `yaml:"insecure"`
+	CallOptions struct {
+		MaxRecvMsgSize int `yaml:"maxRecvMsgSize"`
+		MaxSendMsgSize int `yaml:"maxSendMsgSize"`
+	} `yaml:"callOptions"`
 }
 
 // NewGrpcConfig allows to build a new GrpcConfig instance

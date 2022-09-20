@@ -12,6 +12,7 @@ type Config struct {
 	MaxIdleConnections int    `yaml:"max_idle_connections"`
 	PartitionSize      int64  `yaml:"partition_size"`
 	PartitionBatchSize int64  `yaml:"partition_batch"`
+	TxMode             bool   `yaml:"txMode"`
 }
 
 func NewDatabaseConfig(

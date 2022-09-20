@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gogo/protobuf/proto"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/x/authz"
@@ -194,8 +195,13 @@ func (w Worker) SaveValidators(vals []*tmtypes.Validator) error {
 func (w Worker) ExportBlock(
 	b *tmctypes.ResultBlock, r *tmctypes.ResultBlockResults, txs []*types.Tx, vals *tmctypes.ResultValidators,
 ) error {
+	var err error
+	if v, ok := w.db.(database.SQLOperationIntegrity); ok {
+		panicIfError(v.Begin())
+		defer finalizeTx(err, v, w.logger, b.Block.Height)
+	}
 	// Save all validators
-	err := w.SaveValidators(vals.Validators)
+	err = w.SaveValidators(vals.Validators)
 	if err != nil {
 		return err
 	}
@@ -204,13 +210,15 @@ func (w Worker) ExportBlock(
 	proposerAddr := sdk.ConsAddress(b.Block.ProposerAddress)
 	val := findValidatorByAddr(proposerAddr.String(), vals)
 	if val == nil {
-		return fmt.Errorf("failed to find validator by proposer address %s: %s", proposerAddr.String(), err)
+		err = fmt.Errorf("failed to find validator by proposer address %s: %s", proposerAddr.String(), err)
+		return err
 	}
 
 	// Save the block
 	err = w.db.SaveBlock(types.NewBlockFromTmBlock(b, sumGasTxs(txs)))
 	if err != nil {
-		return fmt.Errorf("failed to persist block: %s", err)
+		err = fmt.Errorf("failed to persist block: %s", err)
+		return err
 	}
 
 	// Save the commits
@@ -225,12 +233,14 @@ func (w Worker) ExportBlock(
 			err = blockModule.HandleBlock(b, r, txs, vals)
 			if err != nil {
 				w.logger.BlockError(module, b, err)
+				return err
 			}
 		}
 	}
 
 	// Export the transactions
-	return w.ExportTxs(txs)
+	err = w.ExportTxs(txs)
+	return err
 }
 
 // ExportCommit accepts a block commitment and a corresponding set of
@@ -278,27 +288,42 @@ func (w Worker) saveTx(tx *types.Tx) error {
 }
 
 // handleTx accepts the transaction and calls the tx handlers.
-func (w Worker) handleTx(tx *types.Tx) {
+func (w Worker) handleTx(tx *types.Tx) error {
 	// Call the tx handlers
 	for _, module := range w.modules {
 		if transactionModule, ok := module.(modules.TransactionModule); ok {
 			err := transactionModule.HandleTx(tx)
 			if err != nil {
-				w.logger.TxError(module, tx, err)
+				return fmt.Errorf(
+					"error while handling HandleTx, err: %s, moduleName: %s, height: %v, txHash: %s",
+					err,
+					module.Name(),
+					tx.Height,
+					tx.TxHash,
+				)
 			}
 		}
 	}
+
+	return nil
 }
 
 // handleMessage accepts the transaction and handles messages contained
 // inside the transaction.
-func (w Worker) handleMessage(index int, msg sdk.Msg, tx *types.Tx) {
+func (w Worker) handleMessage(index int, msg sdk.Msg, tx *types.Tx) error {
 	// Allow modules to handle the message
 	for _, module := range w.modules {
 		if messageModule, ok := module.(modules.MessageModule); ok {
 			err := messageModule.HandleMsg(index, msg, tx)
 			if err != nil {
-				w.logger.MsgError(module, tx, msg, err)
+				return fmt.Errorf(
+					"error while handling HandleMsg, err: %s, moduleName: %s, height: %v, txHash: %s, message: %s",
+					err,
+					module.Name(),
+					tx.Height,
+					tx.TxHash,
+					proto.MessageName(msg),
+				)
 			}
 		}
 	}
@@ -309,34 +334,47 @@ func (w Worker) handleMessage(index int, msg sdk.Msg, tx *types.Tx) {
 			var executedMsg sdk.Msg
 			err := w.codec.UnpackAny(msgAny, &executedMsg)
 			if err != nil {
-				w.logger.Error("unable to unpack MsgExec inner message", "index", authzIndex, "error", err)
+				return fmt.Errorf("unable to unpack MsgExec inner message, index: %v, err: %s", authzIndex, err)
 			}
 
 			for _, module := range w.modules {
 				if messageModule, ok := module.(modules.AuthzMessageModule); ok {
 					err = messageModule.HandleMsgExec(index, msgExec, authzIndex, executedMsg, tx)
 					if err != nil {
-						w.logger.MsgError(module, tx, executedMsg, err)
+						return fmt.Errorf(
+							"error while handling HandleMsgExec, err: %s, moduleName: %s, height: %v, txHash: %s, message: %s",
+							err,
+							module.Name(),
+							tx.Height,
+							tx.TxHash,
+							proto.MessageName(msg),
+						)
 					}
 				}
 			}
 		}
 	}
+
+	return nil
 }
 
 // ExportTxs accepts a slice of transactions and persists then inside the database.
 // An error is returned if the write fails.
 func (w Worker) ExportTxs(txs []*types.Tx) error {
 	// handle all transactions inside the block
+	var err error
 	for _, tx := range txs {
 		// save the transaction
-		err := w.saveTx(tx)
+		err = w.saveTx(tx)
 		if err != nil {
 			return fmt.Errorf("error while storing txs: %s", err)
 		}
 
 		// call the tx handlers
-		go w.handleTx(tx)
+		err = w.handleTx(tx)
+		if err != nil {
+			return err
+		}
 
 		// handle all messages contained inside the transaction
 		sdkMsgs := make([]sdk.Msg, len(tx.Body.Messages))
@@ -351,7 +389,10 @@ func (w Worker) ExportTxs(txs []*types.Tx) error {
 
 		// call the msg handlers
 		for i, sdkMsg := range sdkMsgs {
-			go w.handleMessage(i, sdkMsg, tx)
+			err = w.handleMessage(i, sdkMsg, tx)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -359,4 +400,18 @@ func (w Worker) ExportTxs(txs []*types.Tx) error {
 	logging.DbBlockCount.WithLabelValues("total_blocks_in_db").Set(float64(totalBlocks))
 
 	return nil
+}
+
+func panicIfError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func finalizeTx(err error, i database.SQLOperationIntegrity, l logging.Logger, idx int64) {
+	if err != nil {
+		l.Error("process block finalize with error (rollback)", "block", idx, "err", err, "rollbackErr", i.Rollback())
+		return
+	}
+	l.Info("process block finalize success", "block", idx, "commitErr", i.Commit())
 }

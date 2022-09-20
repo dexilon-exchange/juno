@@ -106,10 +106,11 @@ func StartParsing(ctx *parser.Context) error {
 	}
 
 	if cfg.ParseOldBlocks {
-		go enqueueMissingBlocks(exportQueue, ctx)
-	}
-
-	if cfg.ParseNewBlocks {
+		go func(exQ types.HeightQueue, ctxInternal *parser.Context) {
+			enqueueMissingBlocks(exportQueue, ctx)
+			enqueueNewBlocks(exportQueue, ctx)
+		}(exportQueue, ctx)
+	} else if cfg.ParseNewBlocks {
 		go enqueueNewBlocks(exportQueue, ctx)
 	}
 

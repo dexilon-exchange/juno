@@ -18,66 +18,54 @@ import (
 	"github.com/forbole/juno/v3/types/config"
 )
 
-// Builder creates a database connection with the given database connection info
-// from config. It returns a database connection handle or an error if the
-// connection fails.
-func Builder(ctx *database.Context) (database.Database, error) {
-	sslMode := "disable"
-	if ctx.Cfg.SSLMode != "" {
-		sslMode = ctx.Cfg.SSLMode
-	}
-
-	schema := "public"
-	if ctx.Cfg.Schema != "" {
-		schema = ctx.Cfg.Schema
-	}
-
-	connStr := fmt.Sprintf(
-		"host=%s port=%d dbname=%s user=%s sslmode=%s search_path=%s",
-		ctx.Cfg.Host, ctx.Cfg.Port, ctx.Cfg.Name, ctx.Cfg.User, sslMode, schema,
-	)
-
-	if ctx.Cfg.Password != "" {
-		connStr += fmt.Sprintf(" password=%s", ctx.Cfg.Password)
-	}
-
-	postgresDb, err := sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set max open connections
-	postgresDb.SetMaxOpenConns(ctx.Cfg.MaxOpenConnections)
-	postgresDb.SetMaxIdleConns(ctx.Cfg.MaxIdleConnections)
-
-	if ctx.Cfg.TxMode {
-		return &DatabaseTx{
-			Sql:            postgresDb,
-			EncodingConfig: ctx.EncodingConfig,
-			Logger:         ctx.Logger,
-		}, nil
-	}
-
-	return &Database{
-		Sql:            postgresDb,
-		EncodingConfig: ctx.EncodingConfig,
-		Logger:         ctx.Logger,
-	}, nil
-}
-
 // type check to ensure interface is properly implemented
-var _ database.Database = &Database{}
+var (
+	_ database.Database              = &DatabaseTx{}
+	_ database.SQLOperationIntegrity = &DatabaseTx{}
+)
 
-// Database defines a wrapper around a SQL database and implements functionality
+// DatabaseTx defines a wrapper around a SQL database and implements functionality
 // for data aggregation and exporting.
-type Database struct {
+type DatabaseTx struct {
 	Sql            *sql.DB
+	tx             *sql.Tx
 	EncodingConfig *params.EncodingConfig
 	Logger         logging.Logger
 }
 
+func (db *DatabaseTx) Begin() error {
+	var err error
+	db.tx, err = db.Sql.Begin()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DatabaseTx) Commit() error {
+	db.conditionTxOpen()
+	err := db.tx.Commit()
+	db.tx = nil
+	return err
+}
+
+func (db *DatabaseTx) Rollback() error {
+	db.conditionTxOpen()
+	err := db.tx.Rollback()
+	db.tx = nil
+	return err
+}
+
+func (db *DatabaseTx) conditionTxOpen() {
+	if db.tx == nil {
+		panic("db transaction is not started, call .Begin() to start")
+	}
+}
+
 // createPartitionIfNotExists creates a new partition having the given partition id if not existing
-func (db *Database) createPartitionIfNotExists(table string, partitionID int64) error {
+func (db *DatabaseTx) createPartitionIfNotExists(table string, partitionID int64) error {
+	db.conditionTxOpen()
+
 	partitionTable := fmt.Sprintf("%s_%d", table, partitionID)
 
 	stmt := fmt.Sprintf(
@@ -86,7 +74,7 @@ func (db *Database) createPartitionIfNotExists(table string, partitionID int64) 
 		table,
 		partitionID,
 	)
-	_, err := db.Sql.Exec(stmt)
+	_, err := db.tx.Exec(stmt)
 
 	if err != nil {
 		return err
@@ -98,14 +86,14 @@ func (db *Database) createPartitionIfNotExists(table string, partitionID int64) 
 // -------------------------------------------------------------------------------------------------------------------
 
 // HasBlock implements database.Database
-func (db *Database) HasBlock(height int64) (bool, error) {
+func (db *DatabaseTx) HasBlock(height int64) (bool, error) {
 	var res bool
 	err := db.Sql.QueryRow(`SELECT EXISTS(SELECT 1 FROM block WHERE height = $1);`, height).Scan(&res)
 	return res, err
 }
 
 // GetLastBlockHeight returns the last block height stored inside the database
-func (db *Database) GetLastBlockHeight() (int64, error) {
+func (db *DatabaseTx) GetLastBlockHeight() (int64, error) {
 	stmt := `SELECT height FROM block ORDER BY height DESC LIMIT 1;`
 
 	var height int64
@@ -122,22 +110,24 @@ func (db *Database) GetLastBlockHeight() (int64, error) {
 }
 
 // SaveBlock implements database.Database
-func (db *Database) SaveBlock(block *types.Block) error {
+func (db *DatabaseTx) SaveBlock(block *types.Block) error {
+	db.conditionTxOpen()
 	sqlStatement := `
 INSERT INTO block (height, hash, num_txs, total_gas, proposer_address, timestamp)
 VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`
 
 	proposerAddress := sql.NullString{Valid: len(block.ProposerAddress) != 0, String: block.ProposerAddress}
-	_, err := db.Sql.Exec(sqlStatement,
+	_, err := db.tx.Exec(sqlStatement,
 		block.Height, block.Hash, block.TxNum, block.TotalGas, proposerAddress, block.Timestamp,
 	)
 	return err
 }
 
 // GetTotalBlocks implements database.Database
-func (db *Database) GetTotalBlocks() int64 {
+func (db *DatabaseTx) GetTotalBlocks() int64 {
+	db.conditionTxOpen()
 	var blockCount int64
-	err := db.Sql.QueryRow(`SELECT count(*) FROM block;`).Scan(&blockCount)
+	err := db.tx.QueryRow(`SELECT count(*) FROM block;`).Scan(&blockCount)
 	if err != nil {
 		return 0
 	}
@@ -146,7 +136,8 @@ func (db *Database) GetTotalBlocks() int64 {
 }
 
 // SaveTx implements database.Database
-func (db *Database) SaveTx(tx *types.Tx) error {
+func (db *DatabaseTx) SaveTx(tx *types.Tx) error {
+	db.conditionTxOpen()
 	var partitionID int64
 
 	partitionSize := config.Cfg.Database.PartitionSize
@@ -162,7 +153,8 @@ func (db *Database) SaveTx(tx *types.Tx) error {
 }
 
 // saveTxInsidePartition stores the given transaction inside the partition having the given id
-func (db *Database) saveTxInsidePartition(tx *types.Tx, partitionId int64) error {
+func (db *DatabaseTx) saveTxInsidePartition(tx *types.Tx, partitionId int64) error {
+	db.conditionTxOpen()
 	sqlStatement := `
 INSERT INTO transaction 
 (hash, height, success, messages, memo, signatures, signer_infos, fee, gas_wanted, gas_used, raw_log, logs, partition_id) 
@@ -215,7 +207,7 @@ ON CONFLICT (hash, partition_id) DO UPDATE
 		return err
 	}
 
-	_, err = db.Sql.Exec(sqlStatement,
+	_, err = db.tx.Exec(sqlStatement,
 		tx.TxHash, tx.Height, tx.Successful(),
 		msgsBz, tx.Body.Memo, pq.Array(sigs),
 		sigInfoBz, string(feeBz),
@@ -226,15 +218,17 @@ ON CONFLICT (hash, partition_id) DO UPDATE
 }
 
 // HasValidator implements database.Database
-func (db *Database) HasValidator(addr string) (bool, error) {
+func (db *DatabaseTx) HasValidator(addr string) (bool, error) {
+	db.conditionTxOpen()
 	var res bool
 	stmt := `SELECT EXISTS(SELECT 1 FROM validator WHERE consensus_address = $1);`
-	err := db.Sql.QueryRow(stmt, addr).Scan(&res)
+	err := db.tx.QueryRow(stmt, addr).Scan(&res)
 	return res, err
 }
 
 // SaveValidators implements database.Database
-func (db *Database) SaveValidators(validators []*types.Validator) error {
+func (db *DatabaseTx) SaveValidators(validators []*types.Validator) error {
+	db.conditionTxOpen()
 	if len(validators) == 0 {
 		return nil
 	}
@@ -251,12 +245,13 @@ func (db *Database) SaveValidators(validators []*types.Validator) error {
 
 	stmt = stmt[:len(stmt)-1] // Remove trailing ,
 	stmt += " ON CONFLICT DO NOTHING"
-	_, err := db.Sql.Exec(stmt, vparams...)
+	_, err := db.tx.Exec(stmt, vparams...)
 	return err
 }
 
 // SaveCommitSignatures implements database.Database
-func (db *Database) SaveCommitSignatures(signatures []*types.CommitSig) error {
+func (db *DatabaseTx) SaveCommitSignatures(signatures []*types.CommitSig) error {
+	db.conditionTxOpen()
 	if len(signatures) == 0 {
 		return nil
 	}
@@ -273,12 +268,13 @@ func (db *Database) SaveCommitSignatures(signatures []*types.CommitSig) error {
 
 	stmt = stmt[:len(stmt)-1]
 	stmt += " ON CONFLICT (validator_address, timestamp) DO NOTHING"
-	_, err := db.Sql.Exec(stmt, sparams...)
+	_, err := db.tx.Exec(stmt, sparams...)
 	return err
 }
 
 // SaveMessage implements database.Database
-func (db *Database) SaveMessage(msg *types.Message) error {
+func (db *DatabaseTx) SaveMessage(msg *types.Message) error {
+	db.conditionTxOpen()
 	var partitionID int64
 	partitionSize := config.Cfg.Database.PartitionSize
 	if partitionSize > 0 {
@@ -293,7 +289,8 @@ func (db *Database) SaveMessage(msg *types.Message) error {
 }
 
 // saveMessageInsidePartition stores the given message inside the partition having the provided id
-func (db *Database) saveMessageInsidePartition(msg *types.Message, partitionID int64) error {
+func (db *DatabaseTx) saveMessageInsidePartition(msg *types.Message, partitionID int64) error {
+	db.conditionTxOpen()
 	stmt := `
 INSERT INTO message(transaction_hash, index, type, value, involved_accounts_addresses, height, partition_id) 
 VALUES ($1, $2, $3, $4, $5, $6, $7) 
@@ -303,12 +300,18 @@ ON CONFLICT (transaction_hash, index, partition_id) DO UPDATE
 		value = excluded.value,
 		involved_accounts_addresses = excluded.involved_accounts_addresses`
 
-	_, err := db.Sql.Exec(stmt, msg.TxHash, msg.Index, msg.Type, msg.Value, pq.Array(msg.Addresses), msg.Height, partitionID)
+	_, err := db.tx.Exec(stmt, msg.TxHash, msg.Index, msg.Type, msg.Value, pq.Array(msg.Addresses), msg.Height, partitionID)
 	return err
 }
 
 // Close implements database.Database
-func (db *Database) Close() {
+func (db *DatabaseTx) Close() {
+	if db.tx != nil {
+		err := db.Rollback()
+		if err != nil {
+			db.Logger.Error("error while closing connection tx rollback", "err", err)
+		}
+	}
 	err := db.Sql.Close()
 	if err != nil {
 		db.Logger.Error("error while closing connection", "err", err)
@@ -318,31 +321,34 @@ func (db *Database) Close() {
 // -------------------------------------------------------------------------------------------------------------------
 
 // GetLastPruned implements database.PruningDb
-func (db *Database) GetLastPruned() (int64, error) {
+func (db *DatabaseTx) GetLastPruned() (int64, error) {
+	db.conditionTxOpen()
 	var lastPrunedHeight int64
-	err := db.Sql.QueryRow(`SELECT coalesce(MAX(last_pruned_height),0) FROM pruning LIMIT 1;`).Scan(&lastPrunedHeight)
+	err := db.tx.QueryRow(`SELECT coalesce(MAX(last_pruned_height),0) FROM pruning LIMIT 1;`).Scan(&lastPrunedHeight)
 	return lastPrunedHeight, err
 }
 
 // StoreLastPruned implements database.PruningDb
-func (db *Database) StoreLastPruned(height int64) error {
-	_, err := db.Sql.Exec(`DELETE FROM pruning`)
+func (db *DatabaseTx) StoreLastPruned(height int64) error {
+	db.conditionTxOpen()
+	_, err := db.tx.Exec(`DELETE FROM pruning`)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Sql.Exec(`INSERT INTO pruning (last_pruned_height) VALUES ($1)`, height)
+	_, err = db.tx.Exec(`INSERT INTO pruning (last_pruned_height) VALUES ($1)`, height)
 	return err
 }
 
 // Prune implements database.PruningDb
-func (db *Database) Prune(height int64) error {
-	_, err := db.Sql.Exec(`DELETE FROM pre_commit WHERE height = $1`, height)
+func (db *DatabaseTx) Prune(height int64) error {
+	db.conditionTxOpen()
+	_, err := db.tx.Exec(`DELETE FROM pre_commit WHERE height = $1`, height)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Sql.Exec(`
+	_, err = db.tx.Exec(`
 DELETE FROM message 
 USING transaction 
 WHERE message.transaction_hash = transaction.hash AND transaction.height = $1

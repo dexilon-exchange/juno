@@ -1,16 +1,11 @@
 package remote
 
 import (
-	"context"
 	"crypto/tls"
-	"regexp"
-	"strconv"
-
 	"google.golang.org/grpc/credentials"
+	"regexp"
 
-	grpctypes "github.com/cosmos/cosmos-sdk/types/grpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -18,13 +13,13 @@ var (
 )
 
 // GetHeightRequestContext adds the height to the context for querying the state at a given height
-func GetHeightRequestContext(context context.Context, height int64) context.Context {
-	return metadata.AppendToOutgoingContext(
-		context,
-		grpctypes.GRPCBlockHeightHeader,
-		strconv.FormatInt(height, 10),
-	)
-}
+//func GetHeightRequestContext(context context.Context, height int64) context.Context {
+//	return metadata.AppendToOutgoingContext(
+//		context,
+//		grpctypes.GRPCBlockHeightHeader,
+//		strconv.FormatInt(height, 10),
+//	)
+//}
 
 // MustCreateGrpcConnection creates a new gRPC connection using the provided configuration and panics on error
 func MustCreateGrpcConnection(cfg *GRPCConfig) *grpc.ClientConn {
@@ -42,6 +37,18 @@ func CreateGrpcConnection(cfg *GRPCConfig) (*grpc.ClientConn, error) {
 		grpcOpts = append(grpcOpts, grpc.WithInsecure())
 	} else {
 		grpcOpts = append(grpcOpts, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})))
+	}
+
+	callOptions := make([]grpc.CallOption, 0, 5)
+	if cfg.CallOptions.MaxRecvMsgSize > 0 {
+		callOptions = append(callOptions, grpc.MaxCallRecvMsgSize(cfg.CallOptions.MaxRecvMsgSize))
+	}
+	if cfg.CallOptions.MaxSendMsgSize > 0 {
+		callOptions = append(callOptions, grpc.MaxCallSendMsgSize(cfg.CallOptions.MaxSendMsgSize))
+	}
+
+	if len(callOptions) > 0 {
+		grpc.WithDefaultCallOptions(callOptions...)
 	}
 
 	address := HTTPProtocols.ReplaceAllString(cfg.Address, "")
