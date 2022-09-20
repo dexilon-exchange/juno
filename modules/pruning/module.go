@@ -1,12 +1,12 @@
 package pruning
 
 import (
-	"github.com/forbole/juno/v3/types/config"
+	"github.com/dexilon-exchange/v3/types/config"
 
-	"github.com/forbole/juno/v3/logging"
+	"github.com/dexilon-exchange/v3/logging"
 
-	"github.com/forbole/juno/v3/database"
-	"github.com/forbole/juno/v3/modules"
+	"github.com/dexilon-exchange/v3/database"
+	"github.com/dexilon-exchange/v3/modules"
 )
 
 var (

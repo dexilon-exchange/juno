@@ -1,8 +1,8 @@
 package telemetry
 
 import (
-	"github.com/forbole/juno/v3/modules"
-	"github.com/forbole/juno/v3/types/config"
+	"github.com/dexilon-exchange/v3/modules"
+	"github.com/dexilon-exchange/v3/types/config"
 )
 
 const (

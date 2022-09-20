@@ -3,11 +3,11 @@ package database
 import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 
-	"github.com/forbole/juno/v3/logging"
+	"github.com/dexilon-exchange/v3/logging"
 
-	databaseconfig "github.com/forbole/juno/v3/database/config"
+	databaseconfig "github.com/dexilon-exchange/v3/database/config"
 
-	"github.com/forbole/juno/v3/types"
+	"github.com/dexilon-exchange/v3/types"
 )
 
 // Database represents an abstract database that can be used to save data inside it

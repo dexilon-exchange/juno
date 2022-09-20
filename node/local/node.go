@@ -32,8 +32,8 @@ import (
 	"github.com/tendermint/tendermint/store"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/forbole/juno/v3/node"
-	"github.com/forbole/juno/v3/types"
+	"github.com/dexilon-exchange/v3/node"
+	"github.com/dexilon-exchange/v3/types"
 
 	"path"
 	"time"
@@ -210,13 +210,13 @@ func createAndStartIndexerService(
 
 	switch config.TxIndex.Indexer {
 	case "kv":
-		store, err := dbProvider(&tmnode.DBContext{"tx_index", config})
+		storeEnt, err := dbProvider(&tmnode.DBContext{"tx_index", config})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 
-		txIndexer = kv.NewTxIndex(store)
-		blockIndexer = blockidxkv.New(dbm.NewPrefixDB(store, []byte("block_events")))
+		txIndexer = kv.NewTxIndex(storeEnt)
+		blockIndexer = blockidxkv.New(dbm.NewPrefixDB(storeEnt, []byte("block_events")))
 	default:
 		txIndexer = &null.TxIndex{}
 		blockIndexer = &blockidxnull.BlockerIndexer{}
@@ -526,7 +526,7 @@ func (cp *Node) TxSearch(query string, pagePtr *int, perPagePtr *int, orderBy st
 }
 
 // SubscribeEvents implements node.Node
-func (cp *Node) SubscribeEvents(subscriber, query string) (<-chan tmctypes.ResultEvent, context.CancelFunc, error) {
+func (cp *Node) SubscribeEvents(_, _ string) (<-chan tmctypes.ResultEvent, context.CancelFunc, error) {
 	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	eventCh := make(<-chan tmctypes.ResultEvent)
 	return eventCh, cancel, nil
