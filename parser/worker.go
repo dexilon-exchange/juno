@@ -67,7 +67,6 @@ func (w Worker) Start() {
 			// re-enqueue any failed job after average block time
 			time.Sleep(config.GetAvgBlockTime())
 
-			// TODO: Implement exponential backoff or max retries for a block height.
 			go func() {
 				w.logger.Error("re-enqueueing failed block", "height", i, "err", err)
 				w.queue <- i

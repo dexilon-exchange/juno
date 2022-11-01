@@ -3,7 +3,7 @@ module github.com/dexilon-exchange/juno/v3
 go 1.17
 
 require (
-	github.com/cosmos/cosmos-sdk v0.45.1
+	github.com/cosmos/cosmos-sdk v0.45.5
 	github.com/cosmos/ibc-go/v3 v3.0.0
 	github.com/go-co-op/gocron v1.13.0
 	github.com/gogo/protobuf v1.3.3
@@ -112,7 +112,7 @@ require (
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -120,6 +120,10 @@ require (
 
 replace (
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+	// workaroud for
+	// cgo-gcc-prolog:81:11: warning: 'SecKeychainCreate' is deprecated: first deprecated in macOS 12.0 - Custom keychain management is no longer supported [-Wdeprecated-declarations]
+	// /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Security.framework/Headers/SecKeychain.h:301:10: note: 'SecKeychainCreate' has been explicitly marked deprecated here
+	github.com/keybase/go-keychain => github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4
 	github.com/rs/zerolog => github.com/rs/zerolog v1.21.0
 	github.com/tendermint/tendermint => github.com/forbole/tendermint v0.34.13-0.20210820072129-a2a4af55563d
 )

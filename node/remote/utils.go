@@ -1,9 +1,13 @@
 package remote
 
 import (
+	"context"
 	"crypto/tls"
+	grpctypes "github.com/cosmos/cosmos-sdk/types/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	"regexp"
+	"strconv"
 
 	"google.golang.org/grpc"
 )
@@ -13,13 +17,13 @@ var (
 )
 
 // GetHeightRequestContext adds the height to the context for querying the state at a given height
-//func GetHeightRequestContext(context context.Context, height int64) context.Context {
-//	return metadata.AppendToOutgoingContext(
-//		context,
-//		grpctypes.GRPCBlockHeightHeader,
-//		strconv.FormatInt(height, 10),
-//	)
-//}
+func GetHeightRequestContext(context context.Context, height int64) context.Context {
+	return metadata.AppendToOutgoingContext(
+		context,
+		grpctypes.GRPCBlockHeightHeader,
+		strconv.FormatInt(height, 10),
+	)
+}
 
 // MustCreateGrpcConnection creates a new gRPC connection using the provided configuration and panics on error
 func MustCreateGrpcConnection(cfg *GRPCConfig) *grpc.ClientConn {
