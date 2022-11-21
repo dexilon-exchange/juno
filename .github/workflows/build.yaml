@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Repository Dispatch
-        if: github.ref == 'refs/heads/dev' || 'refs/heads/dev2' || 'refs/heads/qa' || 'refs/heads/master' || 'refs/heads/main' || 'refs/heads/testnet-v2'
+        if: github.ref == 'refs/heads/dev' || 'refs/heads/dev2' || 'refs/heads/qa' || 'refs/heads/testnet-v2'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GIT_TOKEN }}
