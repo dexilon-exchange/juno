@@ -52,7 +52,7 @@ func CreateGrpcConnection(cfg *GRPCConfig) (*grpc.ClientConn, error) {
 	}
 
 	if len(callOptions) > 0 {
-		grpc.WithDefaultCallOptions(callOptions...)
+		grpcOpts = append(grpcOpts, grpc.WithDefaultCallOptions(callOptions...))
 	}
 
 	address := HTTPProtocols.ReplaceAllString(cfg.Address, "")
