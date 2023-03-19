@@ -1,0 +1,31 @@
+name: CD-pipeline
+on:
+  repository_dispatch:
+    types:
+      - triger
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GIT_TOKEN }}
+          script: |
+            try {
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: '${{ github.repository_owner }}',
+                repo: 'dexilon-ops',
+                workflow_id: 'docker-deploy.yml',
+                ref: 'ec2',
+                inputs: {
+                    env: '${{ github.event.client_payload.branch }}',
+                    service: '${{ github.event.repository.name }}'
+                },
+              })
+              console.log(result);
+            } catch(error) {
+              console.error(error);
+              core.setFailed(error);
+            }
